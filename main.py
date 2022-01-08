@@ -1,5 +1,11 @@
 import requests
 from datetime import datetime
+import os
+from twilio.rest import Client
+# from twilio.http.http_client import TwilioHttpClient
+
+account_sid = "AC667dcae38f51fd650ffb369ab4e0955d"
+auth_token = "94c6a799ee4941657ea89318ab8f0d6b"
 
 STOCK_NAME = "TSLA"
 COMPANY_NAME = "Tesla Inc"
@@ -42,9 +48,27 @@ def get_news():
   news_reponse.raise_for_status()
   news_data = news_reponse.json()
   news_articles = news_data["articles"][:3]
+  return news_articles
 
-  print(news_articles)
+
+def send_news(news_articles):
+  for article in news_articles:
+    # proxy_client = TwilioHttpClient()
+    # proxy_client.session.proxies = {'https': os.environ['https_proxy']}
+    # client = Client(account_sid, auth_token, http_client=proxy_client)
+    client = Client(account_sid, auth_token)
+    if percentage_difference > 0:
+      emoji = "⬆️"
+    if percentage_difference < 0:
+      emoji = "⬇️"
+    message = client.messages.create(
+        body=f"{STOCK_NAME}{emoji}{round(abs(percentage_difference))}%\nHeadline: {article['title']}\nLink:{article['url']}",
+        from_='+12563051627',
+        to='+15146294888'
+    )
+    print(message.status)
 
 
-if abs(percentage_difference) > 1:
-  get_news()
+if abs(percentage_difference) > 5:
+  news = get_news()
+  send_news(news)
